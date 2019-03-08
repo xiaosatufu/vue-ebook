@@ -22,12 +22,16 @@
 <script>
 import { ebookMixin } from "../../utils/mixin.js";
 import { FONT_FAMILY } from "../../utils/book.js";
+import {setLocalStorage,getLocalStorage} from "../../utils/localStorage"
 export default {
   mixins: [ebookMixin],
   data() {
     return {
       fontFamilyList: FONT_FAMILY
     };
+  },
+  mounted () {
+    setLocalStorage(this.fileName,this.defaultFontFamily)  
   },
   methods: {
     hide() {
