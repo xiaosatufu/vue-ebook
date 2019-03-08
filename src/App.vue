@@ -3,23 +3,23 @@
     <!-- <div id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
-    </div>
-    <router-view/> -->
+    </div>-->
+     <router-view/> 
     <div class="text">ABCD</div>
   </div>
 </template>
 
 <script>
-  import {mapGetters} from 'vuex'
+  // import {mapGetters} from 'vuex'
   export default {
     computed: {
-      ...mapGetters(['test'])
+      // ...mapGetters(['test'])
     },
     mounted () {
-      this.$store.dispatch('setTest',100).then(()=>{
-        // console.log(this.$store.state.book.test)
-        console.log(this.test)
-      })
+      // this.$store.dispatch('setTest',100).then(()=>{
+      //   // console.log(this.$store.state.book.test)
+      //   console.log(this.test)
+      // })
     }
   }
 
