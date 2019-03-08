@@ -7,6 +7,7 @@
 
 <script>
 // import { mapGetters } from "vuex";
+// import { mapActions } from "vuex";
 import { ebookMixin } from "../../utils/mixin";
 import Epub from "epubjs";
 global.Epub = Epub;
@@ -21,6 +22,7 @@ export default {
   //     ...mapGetters(["fileName","menuVisible"])
   //   },
   methods: {
+    // ...mapActions(["setMenuVisible"]),
     prevPage() {
       if (this.rendition) {
         this.rendition.prev();
@@ -34,10 +36,12 @@ export default {
       }
     },
     toggleTitleAndMenu() {
-      this.$store.dispatch("setMenuVisible", !this.menuVisible);
+      //   this.$store.dispatch("setMenuVisible", !this.menuVisible);
+      this.setMenuVisible(!this.menuVisible);
     },
     hideTitleAndMenu() {
-      this.$store.dispatch("setMenuVisible", false);
+      //   this.$store.dispatch("setMenuVisible", false);
+      this.setMenuVisible(false);
     },
     initEpub() {
       const url = "http://192.168.2.121:8081/epub/" + this.fileName + ".epub";
@@ -72,11 +76,11 @@ export default {
   },
   mounted() {
     // const fileName = ;
-    this.$store
-      .dispatch("setFileName", this.$route.params.fileName.split("|").join("/"))
-      .then(() => {
+    this.setFileName(this.$route.params.fileName.split("|").join("/")).then(
+      () => {
         this.initEpub();
-      });
+      }
+    );
     // console.log(`${baseUrl}${fileName}.epub`);
   }
 };
