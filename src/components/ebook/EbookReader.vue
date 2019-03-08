@@ -37,16 +37,23 @@ export default {
     },
     toggleTitleAndMenu() {
       //   this.$store.dispatch("setMenuVisible", !this.menuVisible);
+      if (this.menuVisible) {
+          this.setSettingVisible(-1)
+      }
       this.setMenuVisible(!this.menuVisible);
+      this.setFontFamilyVisible(false)
     },
     hideTitleAndMenu() {
       //   this.$store.dispatch("setMenuVisible", false);
       this.setMenuVisible(false);
+      this.setSettingVisible(-1)
+      this.setFontFamilyVisible(false)
     },
     initEpub() {
       const url = "http://192.168.2.121:8081/epub/" + this.fileName + ".epub";
       console.log(url);
       this.book = new Epub(url);
+      this.setCurrentBook(this.book)
       console.log(this.book);
       this.rendition = this.book.renderTo("read", {
         width: innerWidth,
@@ -72,6 +79,17 @@ export default {
         // event.preventDefault();
         event.stopPropagation();
       });
+      this.rendition.hooks.content.register(contents=>{
+        Promise.all([
+        contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/cabin.css`),
+        contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/daysOne.css`),
+        contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/montserrat.css`),
+        contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/tangerine.css`)
+        ]).then(()=>{
+          
+        })
+        console.log(process.env.VUE_APP_RES_URL)
+      })
     }
   },
   mounted() {
