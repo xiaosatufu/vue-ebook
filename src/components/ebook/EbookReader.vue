@@ -11,11 +11,15 @@
 import { ebookMixin } from "../../utils/mixin";
 import Epub from "epubjs";
 import {
-  getFontFamily, 
+  getFontFamily,
   saveFontFamily,
   getFontSize,
-  saveFontSize
-  } from "../../utils/localStorage"
+  saveFontSize,
+  getTheme,
+  saveTheme,
+  getLocation
+} from "../../utils/localStorage";
+import { addCss } from "../../utils/book";
 global.Epub = Epub;
 export default {
   mixins: [ebookMixin],
@@ -31,67 +35,103 @@ export default {
     // ...mapActions(["setMenuVisible"]),
     prevPage() {
       if (this.rendition) {
-        this.rendition.prev();
+        this.rendition.prev().then(() => {
+          this.refreshLocation();
+        });
         this.hideTitleAndMenu();
       }
     },
     nextPage() {
       if (this.rendition) {
-        this.rendition.next();
+        this.rendition.next().then(() => {
+          this.refreshLocation();
+        });
         this.hideTitleAndMenu();
       }
     },
     toggleTitleAndMenu() {
       //   this.$store.dispatch("setMenuVisible", !this.menuVisible);
       if (this.menuVisible) {
-          this.setSettingVisible(-1)
+        this.setSettingVisible(-1);
       }
       this.setMenuVisible(!this.menuVisible);
-      this.setFontFamilyVisible(false)
+      this.setFontFamilyVisible(false);
     },
     hideTitleAndMenu() {
       //   this.$store.dispatch("setMenuVisible", false);
       this.setMenuVisible(false);
-      this.setSettingVisible(-1)
-      this.setFontFamilyVisible(false)
+      this.setSettingVisible(-1);
+      this.setFontFamilyVisible(false);
     },
-    initFontSize(){
-        let fontSize = getFontSize(this.fileName)
-        if (!fontSize) {
-          saveFontSize(this.fileName,this.defaultFontSize)
-        }  else {
-          // console.log(font)
-          this.rendition.themes.fontSize(fontSize)
-          console.log(fontSize)
-          this.setDefaultFontSize(fontSize)
-          // alert(1)
-        }
-        // }
+    initFontSize() {
+      let fontSize = getFontSize(this.fileName);
+      if (!fontSize) {
+        saveFontSize(this.fileName, this.defaultFontSize);
+      } else {
+        this.rendition.themes.fontSize(fontSize);
+        this.setDefaultFontSize(fontSize);
+      }
     },
-    initFontFamily(){
-        let font = getFontFamily(this.fileName)
-        if (!font) {
-          saveFontFamily(this.fileName,this.defaultFontFamily)
-        } else {
-          this.rendition.themes.font(font)
-          this.setDefaultFontFamily(font)
-        }
+    initFontFamily() {
+      let font = getFontFamily(this.fileName);
+      if (!font) {
+        saveFontFamily(this.fileName, this.defaultFontFamily);
+      } else {
+        this.rendition.themes.font(font);
+        this.setDefaultFontFamily(font);
+      }
     },
-    initEpub() {
-      const url = "http://192.168.2.121:8081/epub/" + this.fileName + ".epub";
-      console.log(url);
-      this.book = new Epub(url);
-      this.setCurrentBook(this.book)
-      console.log(this.book);
+    initTheme() {
+      let defaultTheme = getTheme(this.fileName);
+      if (!defaultTheme) {
+        defaultTheme = this.themeList[0].name;
+        saveTheme(this.fileName, defaultTheme);
+      }
+      this.setDefaultTheme(defaultTheme);
+      this.themeList.forEach(theme => {
+        this.rendition.themes.register(theme.name, theme.style);
+      });
+      this.rendition.themes.select(defaultTheme);
+    },
+    initRendition() {
       this.rendition = this.book.renderTo("read", {
         width: innerWidth,
         height: innerHeight,
         methods: "default"
       });
-      this.rendition.display().then(()=>{
-        this.initFontSize()
-        this.initFontFamily()
+      const location  = getLocation(this.fileName)
+      this.display(location, () => {
+        this.initTheme();
+        this.initFontSize();
+        this.initFontFamily();
+        this.initGlobalStyle();
       });
+      // this.rendition.display().then(() => {
+      //   this.initTheme();
+      //   this.initFontSize();
+      //   this.initFontFamily();
+      //   this.initGlobalStyle();
+      //   this.refreshLocation();
+      // });
+      this.rendition.hooks.content.register(contents => {
+        Promise.all([
+          contents.addStylesheet(
+            `${process.env.VUE_APP_RES_URL}/fonts/cabin.css`
+          ),
+          contents.addStylesheet(
+            `${process.env.VUE_APP_RES_URL}/fonts/daysOne.css`
+          ),
+          contents.addStylesheet(
+            `${process.env.VUE_APP_RES_URL}/fonts/montserrat.css`
+          ),
+          contents.addStylesheet(
+            `${process.env.VUE_APP_RES_URL}/fonts/tangerine.css`
+          )
+        ]).then(() => {});
+        console.log(process.env.VUE_APP_RES_URL);
+      });
+    },
+    initGesture() {
       this.rendition.on("touchstart", event => {
         this.touchStartX = event.changedTouches[0].clientX;
         this.touchStartTime = event.timeStamp;
@@ -110,17 +150,25 @@ export default {
         // event.preventDefault();
         event.stopPropagation();
       });
-      this.rendition.hooks.content.register(contents=>{
-        Promise.all([
-        contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/cabin.css`),
-        contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/daysOne.css`),
-        contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/montserrat.css`),
-        contents.addStylesheet(`${process.env.VUE_APP_RES_URL}/fonts/tangerine.css`)
-        ]).then(()=>{
-          
-        })
-        console.log(process.env.VUE_APP_RES_URL)
-      })
+    },
+    initEpub() {
+      const url =
+        process.env.VUE_APP_RES_URL + "/epub/" + this.fileName + ".epub";
+      this.book = new Epub(url);
+      this.setCurrentBook(this.book);
+      this.initRendition();
+      this.initGesture();
+      this.book.ready.then(() => {
+        return this.book.locations
+          .generate(
+            750 * (window.innerWidth / 375) * (getFontSize(this.fileName) / 16)
+          )
+          .then(locations => {
+            // console.log(locations)
+            this.setBookAvailable(true);
+            this.refreshLocation()
+          });
+      });
     }
   },
   mounted() {
