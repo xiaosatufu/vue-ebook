@@ -12,7 +12,7 @@
           >
             <div class="line"></div>
             <div class="point-wrapper">
-              <div class="point" v-show="defaultFontSize === item.fontSize">
+              <div class="point" v-show="defaultFontSize == item.fontSize">
                 <div class="small-point"></div>
               </div>
             </div>
@@ -39,12 +39,21 @@
 <script>
 import {FONT_SIZE_LIST} from '../../utils/book'
 import {ebookMixin} from '../../utils/mixin'
+import { saveFontSize } from '../../utils/localStorage';
 export default {
     mixins:[ebookMixin],
     data(){
         return {
-            fontSizeList:FONT_SIZE_LIST
+            fontSizeList:FONT_SIZE_LIST,
+            // isDefault
         }
+    },
+    mounted(){
+      console.log(typeof this.defaultFontSize)
+      console.log(this.fontSizeList)
+      this.fontSizeList.forEach(item=>{
+        console.log(typeof item.fontSize)
+      })
     },
     methods: {
         showFontFamilyPopup(){
@@ -52,6 +61,7 @@ export default {
         },
         setFontSize(fontSize){
             this.setDefaultFontSize(fontSize)
+            saveFontSize(this.fileName,fontSize)
             this.currentBook.rendition.themes.fontSize(fontSize)
         }
     },

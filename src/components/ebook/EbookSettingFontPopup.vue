@@ -22,7 +22,8 @@
 <script>
 import { ebookMixin } from "../../utils/mixin.js";
 import { FONT_FAMILY } from "../../utils/book.js";
-import {setLocalStorage,getLocalStorage} from "../../utils/localStorage"
+// import {setLocalStorage,getLocalStorage} from "../../utils/localStorage"
+import {saveFontFamily} from "../../utils/localStorage"
 export default {
   mixins: [ebookMixin],
   data() {
@@ -31,7 +32,7 @@ export default {
     };
   },
   mounted () {
-    setLocalStorage(this.fileName,this.defaultFontFamily)  
+    // setLocalStorage(this.fileName,this.defaultFontFamily)  
   },
   methods: {
     hide() {
@@ -42,6 +43,7 @@ export default {
     },
     setFontFamily(font){
         this.setDefaultFontFamily(font)
+        saveFontFamily(this.fileName,font)
         if (font==='Default') {
         this.currentBook.rendition.themes.font('Times New Roman')
         } else {
