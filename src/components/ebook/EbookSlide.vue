@@ -1,23 +1,52 @@
 <template>
-  <transition name="fade-slide-right">
-    <div>
-      <div class="slide-content-wrapper" v-show="menuVisible && settingVisible===3">
-        <div class="content">
+  <transition name="fade">
+    <!-- <div> -->
+    <div class="slide-content-wrapper" v-show="menuVisible && settingVisible===3">
+      <transition name="slide-right">
+        <div class="content" v-if="settingVisible===3">
           <div class="content-page-wrapper">
-            <div class="content-page"></div>
-            <div class="content-page-tab"></div>
+            <div class="content-page">
+              <component :is="currentTab===1?content:bookmark"></component>
+            </div>
+            <div class="content-page-tab">
+              <div class="content-page-tab-item"
+              :class="{'selected':currentTab===1}"
+              @click="selectTab(1)"
+              >{{$t('book.navigation')}}</div>
+              <div class="content-page-tab-item"
+              :class="{'selected':currentTab===2}"
+              @click="selectTab(2)"
+              >{{$t('book.bookmark')}}</div>
+            </div>
           </div>
         </div>
-        <div class="content-bg"></div>
-      </div>
+      </transition>
+      <div class="content-bg" @click="hideTitleAndMenu()"></div>
     </div>
+    <!-- </div> -->
   </transition>
 </template>
 
 <script>
 import { ebookMixin } from "../../utils/mixin";
+import EbookSlideContents from "./EbookSlideContents"
 export default {
-  mixins: [ebookMixin]
+  mixins: [ebookMixin],
+  components: {
+    EbookSlideContents
+  },
+  data(){
+    return {
+      currentTab:1,
+      content:EbookSlideContents,
+      bookmark:null
+    }
+  },
+  methods: {
+    selectTab(index){
+      this.currentTab=index
+    }
+  }
 };
 </script>
 
@@ -36,9 +65,25 @@ export default {
     width: 85%;
     height: 100%;
     .content-page-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
       .content-page {
+        flex: 1;
+        width: 100%;
+        overflow: hidden;
       }
       .content-page-tab {
+        flex: 0 0 px2rem(48);
+        width: 100%;
+        height: px2rem(48);
+        display: flex;
+        .content-page-tab-item {
+          flex: 1;
+          font-size: px2rem(12);
+          @include center;
+        }
       }
     }
   }

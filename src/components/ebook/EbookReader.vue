@@ -57,12 +57,6 @@ export default {
       this.setMenuVisible(!this.menuVisible);
       this.setFontFamilyVisible(false);
     },
-    hideTitleAndMenu() {
-      //   this.$store.dispatch("setMenuVisible", false);
-      this.setMenuVisible(false);
-      this.setSettingVisible(-1);
-      this.setFontFamilyVisible(false);
-    },
     initFontSize() {
       let fontSize = getFontSize(this.fileName);
       if (!fontSize) {
@@ -151,6 +145,18 @@ export default {
         event.stopPropagation();
       });
     },
+    parseBook(){
+      this.book.loaded.cover.then(cover=>{
+        // this.book.archive
+        this.book.archive.createUrl(cover).then(url=>{
+          this.setCover(url)
+        })
+        this.book.loaded.metadata.then(metadata=>{
+          this.setMetadata(metadata)
+        })
+        this.book.loaded.navigation
+      })
+    },
     initEpub() {
       const url =
         process.env.VUE_APP_RES_URL + "/epub/" + this.fileName + ".epub";
@@ -158,6 +164,7 @@ export default {
       this.setCurrentBook(this.book);
       this.initRendition();
       this.initGesture();
+      this.parseBook()
       this.book.ready.then(() => {
         return this.book.locations
           .generate(

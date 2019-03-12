@@ -49,7 +49,7 @@ export default {
     getSectionName() {
       if (this.section) {
         const sectionInfo = this.currentBook.section(this.section);
-        if (this.section && sectionInfo) {
+        if (this.section && sectionInfo && this.currentBook && this.currentBook.navigation) {
           return this.currentBook.navigation.get(sectionInfo.href).label;
         }
       }
@@ -105,17 +105,6 @@ export default {
         // });
       }
     },
-    getReadTimeText(){
-        return this.$t('book.haveRead').replace('$1',this.getReadTimeByMinute())
-    },
-    getReadTimeByMinute(){
-        const readTime = getReadTime(this.fileName)
-        if (!readTime) {
-            return 0 
-        } else {
-            return Math.ceil(readTime/60)
-        }
-    }
   },
   updated() {
     this.updateProgressBg();
