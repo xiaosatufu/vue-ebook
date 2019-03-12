@@ -47,12 +47,13 @@ export default {
   },
   computed: {
     getSectionName() {
-      if (this.section) {
-        const sectionInfo = this.currentBook.section(this.section);
-        if (this.section && sectionInfo && this.currentBook && this.currentBook.navigation) {
-          return this.currentBook.navigation.get(sectionInfo.href).label;
-        }
-      }
+      // if (this.section) {
+      //   const sectionInfo = this.currentBook.section(this.section);
+      //   if (this.section && sectionInfo && this.currentBook && this.currentBook.navigation) {
+      //     return this.currentBook.navigation.get(sectionInfo.href).label;
+      //   }
+      // }
+      return this.section?this.navigation[this.section].label:''
     }
   },
   methods: {

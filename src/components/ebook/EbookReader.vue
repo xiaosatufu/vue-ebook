@@ -19,7 +19,7 @@ import {
   saveTheme,
   getLocation
 } from "../../utils/localStorage";
-import { addCss } from "../../utils/book";
+import { addCss, flatten } from "../../utils/book";
 global.Epub = Epub;
 export default {
   mixins: [ebookMixin],
@@ -154,7 +154,18 @@ export default {
         this.book.loaded.metadata.then(metadata=>{
           this.setMetadata(metadata)
         })
-        this.book.loaded.navigation
+        this.book.loaded.navigation.then(nav=>{
+          // console.log(flatten(nav.toc))
+          const navItem = flatten(nav.toc)
+          function find(item,level=0) {
+            return !item.parent?level:find(navItem.filter(parentItem=>parentItem.id===item.parent)[0],++level)
+          }
+          navItem.forEach(item=>{
+            item.level = find(item)
+          })
+          this.setNavigation(navItem)
+        })
+        // console.log(this.book.loaded.navigation)
       })
     },
     initEpub() {

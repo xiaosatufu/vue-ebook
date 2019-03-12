@@ -34,24 +34,54 @@
         <div class="slide-contents-book-time">{{getReadTimeText()}}</div>
       </div>
     </div>
+    <scroll class="slide-contents-list" :top="156" :bottom="48" ref="scroll">
+      <div
+        class="slide-contents-item"
+        v-for="(item,index) in navigation"
+        :key="index"
+        @click="displayNavigation(item.href)"
+      >
+        <span
+          class="slide-contents-item-label"
+          :style="contentItemStyle(item)"
+          :class="{'selected':section===index}"
+        >{{item.label}}</span>
+        <span class="slide-contents-item-page"></span>
+      </div>
+    </scroll>
   </div>
 </template>
 
 <script>
 import { ebookMixin } from "../../utils/mixin";
+import Scroll from "../common/Scroll";
+import { px2rem } from "../../utils/utils";
 export default {
   mixins: [ebookMixin],
+  components: {
+    Scroll
+  },
   data() {
     return {
       searchVisible: false
     };
   },
   methods: {
+    displayNavigation(target) {
+      this.display(target, () => {
+        this.hideTitleAndMenu();
+      });
+    },
     showSearchPage() {
       this.searchVisible = true;
     },
     hideSerachPage() {
       this.searchVisible = false;
+    },
+    contentItemStyle(item) {
+      return {
+        marginLeft: `${px2rem(item.level * 15)}rem`
+      };
     }
   }
 };
@@ -95,11 +125,11 @@ export default {
     }
   }
   .slide-contents-book-wrapper {
-      font-size: 0;
+    font-size: 0;
     display: flex;
     width: 100%;
     height: px2rem(90);
-    padding:px2rem(10) px2rem(15) px2rem(20) px2rem(15);
+    padding: px2rem(10) px2rem(15) px2rem(20) px2rem(15);
     box-sizing: border-box;
     .slide-contents-book-img-wrapper {
       flex: 0 0 px2rem(45);
@@ -111,14 +141,14 @@ export default {
     .slide-contents-book-info-wrapper {
       flex: 1;
       padding: 0 px2rem(10);
-    box-sizing: border-box;
+      box-sizing: border-box;
       .slide-contents-book-title {
-          width: px2rem(153.75);
+        width: px2rem(153.75);
         font-size: px2rem(14);
         @include ellipsis2(3);
       }
       .slide-contents-book-author {
-          width: px2rem(153.75);
+        width: px2rem(153.75);
         font-size: px2rem(12);
         @include ellipsis;
         margin-top: px2rem(5);
@@ -134,8 +164,26 @@ export default {
         }
       }
       .slide-contents-book-time {
-          font-size: px2rem(12);
-          margin-top: px2rem(5);
+        font-size: px2rem(12);
+        margin-top: px2rem(5);
+      }
+    }
+  }
+  .slide-contents-list {
+    padding: 0 px2rem(15);
+    box-sizing: border-box;
+    .slide-contents-item {
+      padding: px2rem(20) 0;
+      box-sizing: border-box;
+      display: flex;
+      .slide-contents-item-label {
+        //   font: 1px;
+        flex: 1;
+        font-size: px2rem(14);
+        line-height: px2rem(16);
+        @include ellipsis;
+      }
+      .slide-contents-item-page {
       }
     }
   }
